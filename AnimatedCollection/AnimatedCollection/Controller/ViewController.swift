@@ -34,24 +34,40 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! MyCollectionViewCell
         cell.backgroundColor = .blue
+        cell.layer.cornerRadius = 16
+        cell.layer.cornerCurve = .continuous
         return cell
     }
-    
-    // MARK: - UIScrollViewDelegate
-    
+}
+
+extension ViewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView.panGestureRecognizer.translation(in: scrollView).y < 0 {
-            if let cellToAnimate = collectionView.visibleCells.first {
-                let finalPosition = CGPoint(x: 0, y: scrollView.contentOffset.y)
+        let center = collectionView.center
+        
+        for cell in collectionView.visibleCells {
+            guard let indexPath = collectionView.indexPath(for: cell) else { continue }
+            let offset = cell.center.y - collectionView.contentOffset.y
+            let normalizedOffset = abs(center.y - offset) / center.y
+            let smoothOffset = normalizedOffset * normalizedOffset
+            
+            var transform = CATransform3DIdentity
+            
+            if offset < center.y, indexPath.row != 0 || scrollView.contentOffset.y > 0 {
+                transform.m34 = -1.0 / 1000.0
+                let rotation = smoothOffset * .pi / 3.0
+                transform = CATransform3DRotate(transform, rotation, 1, 1, 0)
                 
-                UIView.animate(withDuration: 0.3) {
-                    cellToAnimate.frame = CGRect(origin: finalPosition, size: cellToAnimate.frame.size)
-                }
+                let translationFactor = -cell.bounds.width * 0.7 * smoothOffset
+                transform = CATransform3DTranslate(transform, translationFactor, -translationFactor, 0)
+                
+                cell.alpha = 1 - smoothOffset
+            } else {
+                cell.alpha = 1.0
             }
+            
+            cell.layer.transform = transform
         }
     }
 }
 
-class MyCollectionViewCell: UICollectionViewCell {
-    // Здесь может быть ваш код для настройки ячейки
-}
+class MyCollectionViewCell: UICollectionViewCell {}
