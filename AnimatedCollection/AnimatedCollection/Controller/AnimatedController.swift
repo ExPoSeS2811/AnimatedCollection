@@ -39,10 +39,10 @@ class AnimatedController: UIViewController {
     private func setupUI() {
         view.addSubview(homeAnimationCollectionView)
         NSLayoutConstraint.activate([
-            homeAnimationCollectionView.topAnchor.constraint(equalTo: view.topAnchor),
-            homeAnimationCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            homeAnimationCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            homeAnimationCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            homeAnimationCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            homeAnimationCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            homeAnimationCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+            homeAnimationCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
 }
