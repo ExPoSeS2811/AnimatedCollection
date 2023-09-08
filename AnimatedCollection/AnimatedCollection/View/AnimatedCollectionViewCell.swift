@@ -1,10 +1,10 @@
 import UIKit
 
 class AnimatedCollectionViewCell: UICollectionViewCell {
-    static let identifier = "AnimatedCollectionViewCell"
-    
+    // MARK: - GUI Variables
+
     private lazy var houseImage: UIImageView = {
-        let image = UIImageView(image: UIImage(named: "house"))
+        let image = UIImageView(image: UIImage(named: "house1"))
         image.contentMode = .scaleAspectFill
         image.clipsToBounds = true
         image.layer.cornerRadius = 15
@@ -17,7 +17,6 @@ class AnimatedCollectionViewCell: UICollectionViewCell {
         label.textAlignment = .center
         return label
     }()
-    
     
     private lazy var informationText: UILabel = {
         let label = UILabel(text: "Data technology futuristic ilustration. A wave of bright partical...", font: UIFont.systemFont(ofSize: 18), textColor: .white)
@@ -36,10 +35,8 @@ class AnimatedCollectionViewCell: UICollectionViewCell {
     }()
     
     private lazy var informationView: UIVisualEffectView = {
-        // Создайте эффект размытия
-        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark) // Вы можете выбрать .dark или .extraLight в зависимости от желаемого стиля
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
         
-        // Создайте вьюху с этим эффектом
         let blurredEffectView = UIVisualEffectView(effect: blurEffect)
         blurredEffectView.layer.cornerRadius = 24
         blurredEffectView.layer.masksToBounds = true
@@ -47,23 +44,11 @@ class AnimatedCollectionViewCell: UICollectionViewCell {
         return blurredEffectView
     }()
     
+    // MARK: - Properties
 
-    private func setupStackView() {
-        let text = [["Size", "816*1456"], ["Type", "Upscale"], ["Date", "Today 5:19"]]
+    static let identifier = "AnimatedCollectionViewCell"
 
-        for item in text {
-            let sv = UIStackView()
-            sv.axis = .vertical
-            sv.distribution = .fillEqually
-
-            for labelContent in item {
-                let label = UILabel(text: labelContent, font: .boldSystemFont(ofSize: 15), textColor: .white)
-                sv.addArrangedSubview(label)
-            }
-
-            informationStackView.addArrangedSubview(sv)
-        }
-    }
+    // MARK: - Initialization
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -103,14 +88,47 @@ class AnimatedCollectionViewCell: UICollectionViewCell {
             informationStackView.trailingAnchor.constraint(equalTo: informationView.contentView.trailingAnchor, constant: -20)
         ])
     }
-
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func setupUI(houseImage: String, houseName: String, informationLabel: String) {
-        self.houseImage.image = UIImage(named: houseImage)
+    // MARK: - Private methods
+
+    private func setupStackView() {
+        let text = [["Size", "816*1456"], ["Type", "Upscale"], ["Date", "Today 5:19"]]
+
+        for item in text {
+            let sv = UIStackView()
+            sv.axis = .vertical
+            sv.distribution = .fillEqually
+
+            for labelContent in item {
+                let label = UILabel(text: labelContent, font: .boldSystemFont(ofSize: 15), textColor: .white)
+                sv.addArrangedSubview(label)
+            }
+
+            informationStackView.addArrangedSubview(sv)
+        }
+    }
+    
+    // MARK: - Methods
+
+    func configure(with post: Post) {
+        self.informationText.text = post.description
+        self.houseName.text = post.houseName
+        let text = [["Size", post.size], ["Type", post.type.rawValue.capitalized], ["Date", post.date]]
+        for (index, item) in text.enumerated() {
+            if let sv = informationStackView.arrangedSubviews[index] as? UIStackView {
+                if let titleLabel = sv.arrangedSubviews[0] as? UILabel,
+                   let valueLabel = sv.arrangedSubviews[1] as? UILabel
+                {
+                    titleLabel.text = item[0]
+                    valueLabel.text = item[1]
+                }
+            }
+        }
+        self.houseImage.image = UIImage(named: post.image)
     }
 }

@@ -1,7 +1,8 @@
 import UIKit
 
-class ViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UIScrollViewDelegate {
-    
+class AnimatedController: UIViewController {
+    // MARK: - GUI Variables
+
     private lazy var homeAnimationCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.itemSize = CGSize(width: view.frame.width - 32, height: (view.frame.height - 96) / 2)
@@ -16,7 +17,13 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         collection.translatesAutoresizingMaskIntoConstraints = false
         return collection
     }()
-    
+
+    // MARK: - Private properties
+
+    private let posts = Post.getPosts()
+
+    // MARK: - Life Cycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -26,8 +33,9 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
         super.viewWillLayoutSubviews()
         setupUI()
     }
-    
-    
+
+    // MARK: - Private methods
+
     private func setupUI() {
         view.addSubview(homeAnimationCollectionView)
         NSLayoutConstraint.activate([
@@ -36,28 +44,32 @@ class ViewController: UIViewController, UICollectionViewDataSource, UICollection
             homeAnimationCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             homeAnimationCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
-        
     }
-    
-    // MARK: - UICollectionViewDataSource
-    
+}
+
+// MARK: - UICollectionViewDataSource & UICollectionViewDelegate
+
+extension AnimatedController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 50
+        return posts.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: AnimatedCollectionViewCell.identifier, for: indexPath) as! AnimatedCollectionViewCell
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: AnimatedCollectionViewCell.identifier, for: indexPath) as? AnimatedCollectionViewCell else { return UICollectionViewCell() }
+        cell.configure(with: posts[indexPath.row])
         return cell
     }
 }
 
-extension ViewController {
+// MARK: - UIScrollViewDelegate
+
+extension AnimatedController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let center = collectionView.center
+        let center = homeAnimationCollectionView.center
         
-        for cell in collectionView.visibleCells {
-            guard let indexPath = collectionView.indexPath(for: cell) else { continue }
-            let offset = cell.center.y - collectionView.contentOffset.y
+        for cell in homeAnimationCollectionView.visibleCells {
+            guard let indexPath = homeAnimationCollectionView.indexPath(for: cell) else { continue }
+            let offset = cell.center.y - homeAnimationCollectionView.contentOffset.y
             let normalizedOffset = abs(center.y - offset) / center.y
             let smoothOffset = normalizedOffset * normalizedOffset
             
@@ -65,10 +77,10 @@ extension ViewController {
             
             if offset < center.y, indexPath.row != 0 || scrollView.contentOffset.y > 0 {
                 transform.m34 = -1.0 / 1000.0
-                let rotation = smoothOffset * .pi / 3.0
+                let rotation = smoothOffset * .pi / 4.0
                 transform = CATransform3DRotate(transform, rotation, 1, 1, 0)
                 
-                let translationFactor = -cell.bounds.width * 0.7 * smoothOffset
+                let translationFactor = -cell.bounds.width * 0.5 * smoothOffset
                 transform = CATransform3DTranslate(transform, translationFactor, -translationFactor, 0)
                 
                 cell.alpha = 1 - smoothOffset
@@ -80,5 +92,3 @@ extension ViewController {
         }
     }
 }
-
-class MyCollectionViewCell: UICollectionViewCell {}
